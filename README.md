@@ -1,6 +1,6 @@
 # x86 disassembler
 
-A x86 disassembler which disassembles the main 8086/8088 instructions. These include:
+A program written in x86 assembly which disassembles the main 8086/8088 assembly instructions. These include:
 
 	* All MOV instructions
 	* All PUSH instructions
@@ -21,7 +21,11 @@ A x86 disassembler which disassembles the main 8086/8088 instructions. These inc
 
 ## How to run the program
 
-Use the Turbo Assembler compiler (TASM) to compile the program.
+Use the Turbo Assembler (TASM) to compile the program in the DOSBox emulator. This should be done by assembling and linking with TASM tools. The following lines should be entered:
+
+	tasm disasm
+	tlink disasm
+
 The executable file should be run with the name of an input file as a parameter:
 
 	disasm.exe [input_file]
