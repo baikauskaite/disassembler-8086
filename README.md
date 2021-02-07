@@ -1,4 +1,4 @@
-This program has been written as an optional project during the first semester of the Software Engineering degree in Vilnius University.
+This program has been written as an optional project during the first semester of the BSc Software Engineering degree in Vilnius University.
 
 # x86 disassembler
 
