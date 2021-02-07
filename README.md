@@ -1,6 +1,6 @@
 # x86 disassembler
 
-A x86 disassembler which disassebles the main 8086/8088 instructions. These include:
+A x86 disassembler which disassembles the main 8086/8088 instructions. These include:
 
 	* All MOV instructions
 	* All PUSH instructions
