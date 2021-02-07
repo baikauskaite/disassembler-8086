@@ -1,5 +1,7 @@
 # x86 disassembler
 
+*This program has been written as an optional project during the first semester of the Software Engineering degree in Vilnius University.*
+
 A program written in x86 assembly which disassembles the main 8086/8088 assembly instructions. 
 
 The disassembled instructions include:
@@ -20,8 +22,6 @@ The disassembled instructions include:
 	* MUL instruction
 	* DIV instruction
 	* LOOP instruction
-	
-*This program has been written as an optional project during the first semester of the Software Engineering degree in Vilnius University.*
 
 ## How to run the program
 
