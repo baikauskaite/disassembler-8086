@@ -8,7 +8,7 @@
 				db 9, "1) user provides .com file to disassemble", 10, 13
 				db 9, "2) program creates res.txt file to write in.", 10, 13, "$"
 
-	is_success 	db 10, 13
+	is_success db 10, 13
 				db 9, "Your file has been disassembled succesfully.", 10, 13, "$"
 	
 ; FILE VARIABLES:
@@ -23,7 +23,8 @@
 	read_index dw 0
 
 ; WRITING BUFFER:
-	; offset_cs: machine_code instruction_name operator1, operator2
+	; The writing buffer will produce lines in the res.txt according to the syntax below
+	; offset_cs: machine_code instruction_name operator_1(, operator_2)
 	; offset_cs: machine_code UNDEFINED
 	write_buffer db 4 dup (?), ":", 9, 60 dup (?)
 	write_index dw 6
@@ -38,7 +39,7 @@
 	plus_sign db "+"
 	undefined db "UNDEFINED"
 
-; FOR DETECTING THE FORMAT:
+; VARIOUS VARIABLES FOR DETECTING THE FORMAT:
 	offset_cs dw 0100h
 	operation_byte db ?
 	current_byte db ?
@@ -148,8 +149,8 @@
 MAIN PROC NEAR
 	
 	BEGGINING:
-	mov	ax, @data
-	mov	ds, ax
+	mov ax, @data
+	mov ds, ax
 
 	call SCAN_PARAMETRES
 	call OPEN_FILE
@@ -179,7 +180,7 @@ MAIN PROC NEAR
 
     CLOSING_FILES:
     call CLOSE_FILE
-    mov ax, output_handle
+   	mov ax, output_handle
     mov input_handle, ax
     call CLOSE_FILE
     mov ah, 9
@@ -198,31 +199,31 @@ SCAN_PARAMETRES PROC NEAR
 	PARAMETRES:
 	mov dx, es:[bx]
 	inc bx
-	cmp dl, " " ; ar pirmas nuskaitytas simbolis yra tarpas?
-	je PARAMETRES ; skaitomi tolesni baitai
-	cmp dl, 13 ; jei neivesti jokie parametrai
+	cmp dl, " "
+	je PARAMETRES
+	cmp dl, 13
 	je JUMP_TO_HELP
-	cmp dx, "?/" ; tikrinama, ar prasoma pagalbos pranesimo
+	cmp dx, "?/"
 	je JUMP_TO_HELP
 	
     mov si, offset input_file
-    xor cx, cx ; isvalomas registras, kur skaiciuojamas failo pav. ilgis
+    xor cx, cx
 	INPUT_FILE_NAME:
-	cmp dl, 13 ; ar jau baigesi failo pavadinimas
+	cmp dl, 13
 	je IF_COM_SUFFIX
 	cmp dl, " "
 	je INC_BX
-	inc cx ; skaiciuojama, kokio ilgio failo pavadinimas
+	inc cx
 	cmp cx, 10
-	jg NAME_TOO_LONG ; jei failo pavadinimas ilgesnis nei 9 simboliai
-	mov [si], dl ; raides ascii kodas ikeliamas i kintamaji
+	jg NAME_TOO_LONG ; the input file's name should be no longer than 10 characters
+	mov [si], dl
 	INC_BX:
 	mov dl, byte ptr es:[bx]
 	inc bx
 	inc si
 	jmp INPUT_FILE_NAME
 
-	IF_COM_SUFFIX: ; tikrinama, ar tinkamas failo tipas
+	IF_COM_SUFFIX: ; it is checked whether the given file has an appropriate suffix
 	add cx, offset input_file
 	mov si, cx
 	cmp [si-4], "c."
@@ -251,9 +252,9 @@ OPEN_FILE PROC NEAR
 
 	mov ah, 3Dh
 	mov al, 02h
-	mov dx, offset input_file ; ikeliamas failo pavadinimas
+	mov dx, offset input_file ; moving the name of the input file
 	int 21h
-	mov input_handle, ax ; failo deskriptorius irasomas i kintamaji
+	mov input_handle, ax ; saving the descriptor of the file to a variable
 	jnc RET_OPEN
 	
 	mov ah, 9
@@ -289,7 +290,7 @@ CREATE_FILE PROC NEAR
     jmp ENDING
 
 	RET_CREATE_FILE:
-	mov output_handle, ax ; failo deskriptorius irasomas i kintamaji
+	mov output_handle, ax ; saving the descriptor of the file to a variable
 	pop dx
     pop cx
     pop bx
@@ -318,8 +319,8 @@ READ_FILE PROC NEAR
     jmp ENDING
 
     RET_READ_FILE:
-    mov read_length, ax ; perskaitytu baitu skaicius
-    cmp read_length, 0 ; jei perskaitoma 0 baitu, baigiamas programos darbas
+    mov read_length, ax ; the amount of read bytes
+    cmp read_length, 0 ; if 0 bytes have been read, the program ends
 	je TO_ENDING    
     mov read_index, 0
     pop dx
@@ -333,7 +334,7 @@ READ_FILE PROC NEAR
 
 READ_FILE ENDP
 
-GET_ONE_BYTE PROC NEAR ; paimamas vienas baitas is buferio
+GET_ONE_BYTE PROC NEAR ; takes on byte from the reading buffer
 
 	push ax
 	push bx
@@ -342,9 +343,9 @@ GET_ONE_BYTE PROC NEAR ; paimamas vienas baitas is buferio
 
 	mov si, read_index
 	inc si
-	cmp si, read_length ; patikrinama, ar tai nera paskutinis nuskaitytas baitas
+	cmp si, read_length ; checks whether this is the last byte in the reading buffer
 	jbe GET_BYTE
-	call READ_FILE ; jei paskutinis baitas skaitymo bufferyje, skaitomas naujas paragrafas
+	call READ_FILE ; if so, latter bytes from the input file are written into the reading buffer
 	GET_BYTE:
 	mov bx, offset read_buffer
 	mov si, read_index
@@ -352,13 +353,13 @@ GET_ONE_BYTE PROC NEAR ; paimamas vienas baitas is buferio
 	mov current_byte, al
 	mov hex_byte, al
 	mov bx, offset read_index
-	inc byte ptr [bx] ; inkrementuojamas read_buffer indeksas
+	inc byte ptr [bx] ; the index of read_buffer is incremented
 
 	INC_CS_OFFSET:
 	mov bx, offset offset_cs
-	inc word ptr [bx] ; inkrementuojamas cs poslinkio zodis
+	inc word ptr [bx] ; the offset of the CS is incremented
 
-	WRITE_MACHINE_CODE: ; irasomas vienas baitas i rasymo bufferi
+	WRITE_MACHINE_CODE: ; the byte is written in ascii code to the writing buffer
 	mov si, write_index
 	mov bx, offset write_buffer
 	call WRITE_HEX
@@ -449,7 +450,7 @@ GET_CS_OFFSET PROC NEAR
 	call CS_WRITE_BUFFER
 	jmp RET_CS_OFFSET
 
-	CS_WRITE_BUFFER: ; irasomas cs poslinkis i rasymo bufferi
+	CS_WRITE_BUFFER: ; the offset of CS is written into the writing buffer
 	mov si, offset ascii_byte
 	mov al, byte ptr [si]
 	mov byte ptr [di], al
@@ -487,11 +488,11 @@ IF_PREFIX PROC NEAR
 	je IS_PREFIX
 	jmp RET_IF_PREFIX
 
-	IS_PREFIX: ; isirasomas prefiksas i prefix kintamaji
+	IS_PREFIX: ; the prefix is saved into a variable
 	mov al, current_byte
 	mov prefix, al
 
-	CALL_GET_BYTE: ; jei nuskaitytas prefiksas, skaitomas kitas baitas
+	CALL_GET_BYTE: ; if the byte is a prefix, another byte is read
 	call GET_ONE_BYTE
 
 	RET_IF_PREFIX:
@@ -561,7 +562,7 @@ FIND_FORMAT PROC NEAR
 	and al, 11110000b
 	cmp al, 01110000b ; conditional jumps
 	je TO_FORMAT_5
-	mov al, operation_byte ; JCXZ jump
+	mov al, operation_byte ; JCXZ
 	cmp al, 11100011b
 	je TO_FORMAT_5
 
@@ -602,17 +603,17 @@ FIND_FORMAT PROC NEAR
 	je TO_FORMAT_8
 
 	mov al, operation_byte
-	cmp al, 11100010b ; loop vidinis artimas
+	cmp al, 11100010b ; loop direct within segment-short
 	je TO_FORMAT_9
-	cmp al, 11101001b ; jmp vidinis tiesioginis
+	cmp al, 11101001b ; jmp direct within segment
 	je TO_FORMAT_9
-	cmp al, 11101010b ; jmp isorinis tiesioginis
+	cmp al, 11101010b ; jmp direct intersegment
 	je TO_FORMAT_9
-	cmp al, 11101011b ; jmp vidinis artimas
+	cmp al, 11101011b ; jmp direct within segment-short
 	je TO_FORMAT_9
-	cmp al, 11101000b ; call vidinis tiesioginis
+	cmp al, 11101000b ; call direct within segment
 	je TO_FORMAT_9
-	cmp al, 10011010b ; call isorinis tiesioginis
+	cmp al, 10011010b ; call direct intersegment
 	je TO_FORMAT_9
 
 	mov al, operation_byte
@@ -638,7 +639,8 @@ FIND_FORMAT PROC NEAR
 	cmp al, 11110110b ; mul, div
 	je TO_FORMAT_12
 	mov al, operation_byte
-	cmp al, 11111111b ; inc, dec, call ir jmp (vid. netiesioginis, isorinis netiesioginis), push
+	cmp al, 11111111b ; call, jmp: indirect within segment, indirect intersegment
+					  ; inc, dec, push
 	je TO_FORMAT_12
 	cmp al, 11111110b
 	je TO_FORMAT_12
@@ -677,7 +679,7 @@ FORMAT_1 PROC NEAR
 	call FIND_DIRECTION
 	call GET_ONE_BYTE
 	call FIND_MOD_REG_RM
-	call FIND_OFFSET ; jeigu mod 01 arba 00, jei nei vienas, tai nereikia
+	call FIND_OFFSET ; finds the offset if mod is either 00 or 01
 
 	call MOVE_SOME_SPACES
 
@@ -787,7 +789,7 @@ FORMAT_2 PROC NEAR
 	mov al, current_byte
 	mov lower_byte, al
 
-	mov reg, 000h ; pirmas operandas yra akumuliatorius
+	mov reg, 000h ; the first operand is an accumulator (AX, AH, AL)
 	mov al, operation_byte
 	and al, 11110000b
 	cmp al, 10110000b
@@ -1094,14 +1096,14 @@ FORMAT_6 PROC NEAR
 	cmp al, 01
 	je FORMAT_6_SW_01
 
-	FORMAT_6_SW_11: ; operuojama su vienu imm baitu
+	FORMAT_6_SW_11: ; if one immediate byte
 	call GET_ONE_BYTE
 	mov al, sw
 	cmp al, 00
 	je FURTHER_00
 	call IF_NEGATIVE
 	jmp FURTHER_11
-	FURTHER_00: ; vienas imm baitas, bet be ženklo
+	FURTHER_00: ; if one unsigned immediate byte
 	xor ax, ax
 	mov al, current_byte
 	mov byte_offset, ax
@@ -1130,7 +1132,7 @@ FORMAT_6 PROC NEAR
 	call MOVE_WORD
 	jmp RET_FORMAT_6
 
-	FORMAT_6_SW_01: ; operuojama su dviem imm baitais
+	FORMAT_6_SW_01: ; if two immediate bytes
 	call GET_ONE_BYTE
 	mov al, current_byte
 	mov temp_lower_byte, al
@@ -1222,7 +1224,7 @@ FORMAT_7 PROC NEAR
 	mov cx, 1
 	call MOVE_SPACES
 
-	mov reg, 000h ; operandas yra akumuliatorius
+	mov reg, 000h ; the operand is an accumulator (AX, AH, AL)
 
 	FORMAT_7_INS:
 	mov al, operation_byte
@@ -1262,7 +1264,7 @@ FORMAT_8 PROC NEAR
 
 	call GET_ONE_BYTE
 	call FIND_MOD_REG_RM
-	mov al, 1 ; ar interpretuoti, kad cia dirbama tik su zodziais?
+	mov al, 1
 	mov reg_width, al
 	mov al, a_reg
 	mov seg_reg, al
@@ -1316,7 +1318,7 @@ FORMAT_8 PROC NEAR
 	jmp RET_FORMAT_8
 
 	RET_FORMAT_8:
-	mov direction, 0 ; nunulinamas direction
+	mov direction, 0 ; the direction variable is reset to 0
 	call MOVE_ENDLINE
 	jmp RET_FIND_FORMAT
 
@@ -1325,17 +1327,17 @@ FORMAT_8 ENDP
 FORMAT_9 PROC NEAR
 
 	mov al, operation_byte
-	cmp al, 11100010b ; loop vidinis artimas
+	cmp al, 11100010b ; loop direct within segment-short
 	je SHORT_JMP
-	cmp al, 11101011b ; jmp vidinis artimas
+	cmp al, 11101011b ; jmp direct within segment-short
 	je SHORT_JMP	
-	cmp al, 11101001b ; jmp vidinis tiesioginis
+	cmp al, 11101001b ; jmp direct within segment
 	je JMP_DIR_SEG
-	cmp al, 11101010b ; jmp isorinis tiesioginis
+	cmp al, 11101010b ; jmp direct intersegment
 	je TO_JMP_DIR_INT
-	cmp al, 11101000b ; call vidinis tiesioginis
+	cmp al, 11101000b ; call direct within segment
 	je JMP_DIR_SEG
-	cmp al, 10011010b ; call isorinis tiesioginis
+	cmp al, 10011010b ; call direct intersegment
 	je TO_JMP_DIR_INT
 
 	SHORT_JMP:
@@ -1360,17 +1362,17 @@ FORMAT_9 PROC NEAR
 
 	FORMAT_9_INS:
 	mov al, operation_byte
-	cmp al, 11100010b ; loop vidinis artimas
+	cmp al, 11100010b ; loop direct within segment-short
 	je WRITE_LOOP
-	cmp al, 11101011b ; jmp vidinis artimas
+	cmp al, 11101011b ; jmp direct within segment-short
 	je WRITE_JMP	
-	cmp al, 11101001b ; jmp vidinis tiesioginis
+	cmp al, 11101001b ; jmp direct within segment
 	je WRITE_JMP
-	cmp al, 11101010b ; jmp isorinis tiesioginis
+	cmp al, 11101010b ; jmp direct intersegment
 	je WRITE_JMP
-	cmp al, 11101000b ; call vidinis tiesioginis
+	cmp al, 11101000b ; call direct within segment
 	je WRITE_CALL
-	cmp al, 10011010b ; call isorinis tiesioginis
+	cmp al, 10011010b ; call direct intersegment
 	je WRITE_CALL
 	WRITE_LOOP:
 	mov bx, offset i_loop
@@ -1588,12 +1590,12 @@ FORMAT_12 PROC NEAR
 	je FORMAT_12_CALL_FAR
 	mov bl, operation_byte
 	and bl, 11111110b
-	cmp bl, 11110110b ; kadangi sutampa reg, tikrinamas op kodas
+	cmp bl, 11110110b
 	je MUL_OR_DIV
 	cmp al, 00000110b
 	je FORMAT_12_PUSH
 	cmp al, 00000100b
-	je FORMAT_12_JMP ; abu jump
+	je FORMAT_12_JMP ; both jumps
 	MUL_OR_DIV:
 	cmp al, 00000100b
 	je FORMAT_12_MUL
@@ -1786,7 +1788,7 @@ MOD_00_01_10 PROC NEAR
 	mov cx, 2
 	jmp WRITE_EA
 
-	WRITE_DIR_BP:  ; skiriasi mod 00 ir mod 01,10
+	WRITE_DIR_BP:
 	mov al, a_mod
 	cmp al, 00000000b
 	je WRITE_DIR
@@ -1803,7 +1805,7 @@ MOD_00_01_10 PROC NEAR
 	mov al, a_mod
 	cmp al, 00000000b
 	je NO_OFFSET
-	mov bx, offset plus_sign ; idedamas pliuso zenklas
+	mov bx, offset plus_sign ; writing in the '+' sign
 	call MOVE_SYMBOL	
 	mov al, offset_hb
 	mov current_byte, al
@@ -1835,15 +1837,15 @@ FIND_OFFSET PROC NEAR
 	push dx
 
 	mov al, a_mod
-	cmp al, 01000000b ; vieno baito poslinkis
+	cmp al, 01000000b ; one byte offset
 	je OFFSET_1_BYTE
-	cmp al, 10000000b ; dvieju baitu poslinkis
+	cmp al, 10000000b ; two byte offset
 	je OFFSET_2_BYTES
 	mov al, a_rm
-	cmp al, 00000110b ; tiesioginis adresas
+	cmp al, 00000110b ; direct adress
 	jne RET_FIND_OFFSET
 	mov al, a_mod
-	cmp al, 00000000b ; tiesioginis adresas
+	cmp al, 00000000b ; direct adress
 	je OFFSET_2_BYTES
 	jmp RET_FIND_OFFSET
 
@@ -2117,8 +2119,8 @@ UNDEFINED_BYTE ENDP
 MOVE_INSTRUCTION PROC NEAR
 
 	push ax
-	push bx ; atsinesamas is kitos funkcijos, instrukcijos offset
-	push cx ; atsinesamas cx is kitos funkcijos, instrukcijos zodzio ilgis
+	push bx ; parameter of this function, the offset of the instruction
+	push cx ; parameter of this function, the length of the instruction
 	push dx
 	push si
 
@@ -2152,7 +2154,7 @@ MOVE_BYTE PROC NEAR
 
 	mov cx, 2
 	mov bx, offset ascii_byte
-	MOVING_BYTE: ; ikeliamas baitas i rasymo bufferi
+	MOVING_BYTE: ; the byte is imported to the writing buffer
 	mov si, offset write_buffer
 	mov di, offset write_index
 	add si, write_index
@@ -2182,15 +2184,15 @@ MOVE_WORD PROC NEAR
 	push di
 
 	mov al, current_byte
-	cmp al, 00 ; nespausdinamas vyresnysis baitas, jei jo reiksme 00
+	cmp al, 00 ; the byte is not imported to the writing buffer if it is equal to 0
 	je SKIP_00
 	mov hex_byte, al
-	call WRITE_HEX ; spausdinamas vyresnysis baitas
+	call WRITE_HEX ; importing the higher byte to the writing buffer
 	call MOVE_BYTE
 	SKIP_00:
 	mov al, lower_byte
 	mov hex_byte, al
-	call WRITE_HEX ; spausdinamas jaunesnysis baitas
+	call WRITE_HEX ; importing the lower byte to the writing buffer
 	call MOVE_BYTE
 
 	pop di
@@ -2220,7 +2222,7 @@ MOVE_PREFIX PROC NEAR
 	je SS_PREFIX
 	cmp prefix, 3Eh
 	je DS_PREFIX
-	jmp RET_MOVE_PREFIX ; jeigu prefix kintamojo reiksme 0, griztama is proceduros
+	jmp RET_MOVE_PREFIX ; if the prefix variable is equal to 0, return from the procedure
 
 	ES_PREFIX:
 	mov bx, offset seg_es
@@ -2239,7 +2241,7 @@ MOVE_PREFIX PROC NEAR
 
 	MOVING_PREFIX:
 	mov cx, 3
-	call MOVE_INSTRUCTION ; ikeliamas prefiksas i rasymo buferi
+	call MOVE_INSTRUCTION ; importing the prefix to the writing buffer
 
 	RET_MOVE_PREFIX:
 	pop di
@@ -2252,7 +2254,7 @@ MOVE_PREFIX PROC NEAR
 
 MOVE_PREFIX ENDP
 
-BYTE_WORD_PTR PROC NEAR ; atpazinama, ar reikia irasyti "word ptr" ar "byte ptr"
+BYTE_WORD_PTR PROC NEAR ; checking whether to write "word ptr" or "byte ptr"
 
 	cmp reg_width, 1
 	je IS_WORD_PTR
@@ -2330,7 +2332,7 @@ MOVE_SPACES PROC NEAR
 
 	push ax
 	push bx
-	push cx ; atsinesamas cx is kitos funkcijos, jame irasytas reikalingas tarpu skaicius
+	push cx ; parameter of this function, the amount of spaces needed to be imported to the writing buffer
 	push dx
 	push si
 
@@ -2482,7 +2484,7 @@ MOVE_COMMA ENDP
 MOVE_SYMBOL PROC NEAR
 
 	push ax
-	push bx ; atsinesamas is kitos funkcijos, simbolio offset
+	push bx ; parameter of this function, the offset of the symbol wanted to be written to the writing buffer
 	push cx
 	push dx
 	push si
@@ -2511,7 +2513,7 @@ WRITE_FILE PROC NEAR
 	push dx
 
 	mov ah, 40h
-	mov bx, output_handle ; output failo deskriptorius
+	mov bx, output_handle ; the descriptor of the output file
 	mov cx, write_index
 	mov dx, offset write_buffer
 	int 21h
@@ -2523,7 +2525,7 @@ WRITE_FILE PROC NEAR
     jmp ENDING
     
     RET_WRITE:
-    mov write_index, 6 ; i write_buffer indeksa irasoma 6, nuo kur pradeti rasyti kita masinini koda
+    mov write_index, 6
     pop dx
     pop cx
     pop bx
