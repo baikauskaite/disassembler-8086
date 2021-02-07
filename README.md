@@ -1,8 +1,8 @@
 This program has been written as an optional project during the first semester of the BSc Software Engineering degree in Vilnius University.
 
-# The x86 disassembler
+# x86 disassembler
 
-A program written in x86 assembly which disassembles the main 8086/8088 assembly instructions. It disassembles the machine code in `.com` executables and produces a `.txt` file that lists all the disassembled instructions.
+A program written in x86 assembly which disassembles the _main_ 8086/8088 assembly instructions. It disassembles the machine code in `.com` executables and produces a `.txt` file that lists all the disassembled instructions.
 
 The instructions that this program disassembles include:
 
