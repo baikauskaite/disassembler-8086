@@ -20,6 +20,8 @@ The disassembled instructions include:
 	* MUL instruction
 	* DIV instruction
 	* LOOP instruction
+	
+*This program has been written as an optional project during the first semester of the Software Engineering degree in Vilnius University.*
 
 ## How to run the program
 
@@ -33,7 +35,3 @@ Run the program with an input file which has a `.com` suffix:
 	disasm [input_file.com]
 	
 The program will disassemble the instructions in your given `input_file.com` and produce a `res.txt` containing the disassembled instructions.
-
-
-
-__This program has been written as an optional project during the first semester of the Software Engineering degree in Vilnius University.__
