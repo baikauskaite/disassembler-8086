@@ -1,6 +1,6 @@
 # x86 disassembler
 
-An x86 disassembler which disassebles the main 8086/8088 instruction. These include:
+A x86 disassembler which disassebles the main 8086/8088 instructions. These include:
 
 	* All MOV instructions
 	* All PUSH instructions
@@ -26,4 +26,4 @@ The executable file should be run with the name of an input file as a parameter:
 
 	disasm.exe [input_file]
 	
-The program's output is a file named "res.txt" containing disassembled instructions.
+The program's output is a file named 'res.txt' containing disassembled instructions.
