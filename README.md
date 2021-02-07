@@ -25,7 +25,7 @@ The disassembled instructions include:
 
 ## How to run the program
 
-Compile the code in the [DOSBox emulator] by using the [Turbo Assembler (TASM)]. This should be done by assembling and linking with TASM tools. The following lines should be entered to produce the executable:
+Compile the code in the *DOSBox emulator* by using the *Turbo Assembler (TASM)*. This should be done by assembling and linking with *TASM* tools. The following lines should be entered to produce the executable:
 
 	tasm disasm
 	tlink disasm
