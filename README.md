@@ -1,10 +1,10 @@
+This program has been written as an optional project during the first semester of the Software Engineering degree in Vilnius University.
+
 # x86 disassembler
 
-*This program has been written as an optional project during the first semester of the Software Engineering degree in Vilnius University.*
+A program written in x86 assembly which disassembles the main 8086/8088 assembly instructions. It disassembles the machine code in `.com` executables and produces a `.txt` file that lists all the disassembled instructions.
 
-A program written in x86 assembly which disassembles the main 8086/8088 assembly instructions. 
-
-The disassembled instructions include:
+The instructions that this program disassembles include:
 
 	* All MOV instructions
 	* All PUSH instructions
