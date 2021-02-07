@@ -26,4 +26,4 @@ The executable file should be run with the name of an input file as a parameter:
 
 	disasm.exe [input_file]
 	
-The program's output is a file named 'res.txt' containing disassembled instructions.
+The program's output is a file named `res.txt` containing disassembled instructions.
