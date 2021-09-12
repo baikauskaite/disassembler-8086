@@ -24,7 +24,7 @@
 
 ; WRITING BUFFER:
 	; The writing buffer will produce lines in the res.txt according to the syntax below
-	; offset_cs: machine_code instruction_name operator_1(, operator_2)
+	; offset_cs: machine_code instruction_name operand_1(, operand_2)
 	; offset_cs: machine_code UNDEFINED
 	write_buffer db 4 dup (?), ":", 9, 60 dup (?)
 	write_index dw 6
